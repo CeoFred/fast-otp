@@ -48,8 +48,7 @@ type GenerateOTPPayload struct {
 	Validity    int    `json:"validity"`
 }
 
-
-func (f *FastOtp) NewFastOTP(apiKey string) *FastOtp {
+func NewFastOTP(apiKey string) *FastOtp {
 	return &FastOtp{APIKey: &apiKey, BaseURL: "https://api.fastotp.co"}
 }
 
