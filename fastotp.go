@@ -29,6 +29,10 @@ type GenerateOTPPayload struct {
 	Validity    int    `json:"validity"`
 }
 
+func (f *FastOtp) NewFastOTP(apiKey string) *FastOtp {
+	return &FastOtp{APIKey: &apiKey, BaseURL: "https://api.fastotp.co"}
+}
+
 func (f *FastOtp) GenerateOTP(payload GenerateOTPPayload) (*GenerateOTPPayload, error) {
 
 	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey)

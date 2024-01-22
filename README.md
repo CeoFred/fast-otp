@@ -20,7 +20,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/CeoFred/fastotp"
+	"github.com/CeoFred/fast-otp"
 )
 
 func main() {
