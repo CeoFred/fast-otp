@@ -3,10 +3,11 @@ package fastotp
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
+	// "io/ioutil"
 
 	"github.com/CeoFred/fast-otp/lib"
-
-	"net/http"
 )
 
 type FastOtp struct {
@@ -17,6 +18,24 @@ type FastOtp struct {
 type ErrorResponse struct {
 	Errors  map[string][]string `json:"errors"`
 	Message string              `json:"message"`
+}
+type OTP struct {
+	CreatedAt       time.Time       `json:"created_at"`
+	DeliveryDetails DeliveryDetails `json:"delivery_details"`
+	DeliveryMethods []string        `json:"delivery_methods"`
+	ExpiresAt       time.Time       `json:"expires_at"`
+	ID              string          `json:"id"`
+	Identifier      string          `json:"identifier"`
+	Status          string          `json:"status"`
+	Type            string          `json:"type"`
+	UpdatedAt       time.Time       `json:"updated_at"`
+}
+type OTPResponse struct {
+	OTP OTP `json:"otp"`
+}
+
+type DeliveryDetails struct {
+	Email string `json:"email"`
 }
 
 type GenerateOTPPayload struct {
@@ -33,11 +52,10 @@ func (f *FastOtp) NewFastOTP(apiKey string) *FastOtp {
 	return &FastOtp{APIKey: &apiKey, BaseURL: "https://api.fastotp.co"}
 }
 
-func (f *FastOtp) GenerateOTP(payload GenerateOTPPayload) (*GenerateOTPPayload, error) {
+func (f *FastOtp) GenerateOTP(payload GenerateOTPPayload) (*OTP, error) {
 
 	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey)
 	resp, err := cl.Post("/generate", payload)
-
 	if err != nil {
 		return nil, err
 	}
@@ -55,12 +73,15 @@ func (f *FastOtp) GenerateOTP(payload GenerateOTPPayload) (*GenerateOTPPayload, 
 
 		return nil, fmt.Errorf("API error: %s", errorResponse.Message)
 	}
-	var otpResponse GenerateOTPPayload
+
+	var otpResponse OTPResponse
 	if err := json.NewDecoder(resp.Body).Decode(&otpResponse); err != nil {
 		return nil, err
 	}
 
-	return &otpResponse, nil
+	fmt.Println(otpResponse, "<<< ID")
+
+	return &otpResponse.OTP, nil
 }
 
 func formatValidationError(errors map[string][]string) error {

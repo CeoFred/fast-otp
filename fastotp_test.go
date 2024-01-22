@@ -1,6 +1,8 @@
 package fastotp
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,14 +21,25 @@ func TestGenerateOTP(t *testing.T) {
 
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{
-			"delivery": {
-				"email": "test@example.com"
-			},
-			"identifier": "test_identifier",
-			"token_length": 6,
-			"type": "numeric",
-			"validity": 120
+			"otp": {
+				"created_at": "2024-01-19T00:24:06.000000Z",
+				"delivery_details": {
+					"email": "test@example.com"
+				},
+				"delivery_methods": [
+					"email"
+				],
+				"expires_at": "2024-01-19T17:04:06.000000Z",
+				"id": "9b202659-fee7-46ab-836b-cdd310c4f327",
+				"identifier": "test_identifier",
+				"status": "pending",
+				"type": "alpha_numeric",
+				"updated_at": "2024-01-19T00:24:06.000000Z"
+			}
 		}`))
+
+		body, _ := ioutil.ReadAll(r.Body)
+		fmt.Println("Request Body:", string(body))
 	}))
 	defer server.Close()
 
@@ -40,7 +53,7 @@ func TestGenerateOTP(t *testing.T) {
 		},
 		Identifier:  "test_identifier",
 		TokenLength: 6,
-		Type:        "numeric",
+		Type:        "alpha_numeric",
 		Validity:    120,
 	}
 
@@ -48,9 +61,10 @@ func TestGenerateOTP(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
+	fmt.Println("Generated OTP:", otp)
 
-	if otp.Delivery.Email != "test@example.com" {
-		t.Errorf("Expected email: %s, got %s", "test@example.com", otp.Delivery.Email)
+	if otp.DeliveryDetails.Email != "test@example.com" {
+		t.Errorf("Expected email: %s, got %s", "test@example.com", otp.DeliveryDetails.Email)
 	}
 	if otp.Identifier != "test_identifier" {
 		t.Errorf("Expected identifier: %s, got %s", "test_identifier", otp.Identifier)
