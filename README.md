@@ -5,7 +5,7 @@ FastOTP is a Go library for interacting with the FastOTP API to generate one-tim
 ## Installation
 
 ```bash
-go get -u github.com/CeoFred/fast-otp
+go get -u github.com/CeoFred/fast-otp@v1.0.2
 ```
 
 ## Usage
@@ -13,14 +13,14 @@ go get -u github.com/CeoFred/fast-otp
 ### Basic Example
 
 ```go
+
 package main
 
 import (
 	"fmt"
 	"log"
-	"time"
 
-	"github.com/CeoFred/fast-otp"
+	"github.com/CeoFred/fast-otp" 
 )
 
 func main() {
@@ -49,8 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Generated OTP: %s\n", otp.ID)
-	fmt.Printf("Expires at: %s\n", otp.ExpiresAt.Format(time.RFC3339))
+	fmt.Printf("Generated OTP: %s\n", otp)
 }
 ```
 
