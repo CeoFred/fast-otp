@@ -45,12 +45,12 @@ func TestGenerateOTP(t *testing.T) {
 
 	fastOtp := &FastOtp{APIKey: new(string), BaseURL: server.URL}
 
+	delivery := OtpDelivery{
+		"email": "test@example.com",
+	}
+
 	payload := GenerateOTPPayload{
-		Delivery: struct {
-			Email string `json:"email"`
-		}{
-			Email: "test@example.com",
-		},
+		Delivery:    delivery,
 		Identifier:  "test_identifier",
 		TokenLength: 6,
 		Type:        "alpha_numeric",
