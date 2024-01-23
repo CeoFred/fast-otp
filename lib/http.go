@@ -3,6 +3,7 @@ package httpclient
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -20,7 +21,6 @@ func NewAPIClient(baseURL, apiKey string) *APIClient {
 	}
 }
 
-
 // Post sends a POST request to the specified endpoint with the given payload.
 func (c *APIClient) Post(endpoint string, payload interface{}) (*http.Response, error) {
 	url := c.BaseURL + endpoint
@@ -31,13 +31,13 @@ func (c *APIClient) Post(endpoint string, payload interface{}) (*http.Response, 
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.APIKey)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.APIKey))
 
 	client := http.DefaultClient
 	return client.Do(req)

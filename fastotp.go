@@ -10,6 +10,10 @@ import (
 	"github.com/CeoFred/fast-otp/lib"
 )
 
+const (
+	BaseUrl = "https://api.fastotp.co"
+)
+
 type FastOtp struct {
 	APIKey  *string
 	BaseURL string
@@ -38,18 +42,18 @@ type DeliveryDetails struct {
 	Email string `json:"email"`
 }
 
+type OtpDelivery map[string]string
+
 type GenerateOTPPayload struct {
-	Delivery struct {
-		Email string `json:"email"`
-	} `json:"delivery"`
-	Identifier  string `json:"identifier"`
-	TokenLength int    `json:"token_length"`
-	Type        string `json:"type"`
-	Validity    int    `json:"validity"`
+	Delivery    OtpDelivery `json:"delivery"`
+	Identifier  string      `json:"identifier"`
+	TokenLength int         `json:"token_length"`
+	Type        string      `json:"type"`
+	Validity    int         `json:"validity"`
 }
 
 func NewFastOTP(apiKey string) *FastOtp {
-	return &FastOtp{APIKey: &apiKey, BaseURL: "https://api.fastotp.co"}
+	return &FastOtp{APIKey: &apiKey, BaseURL: BaseUrl}
 }
 
 func (f *FastOtp) GenerateOTP(payload GenerateOTPPayload) (*OTP, error) {
