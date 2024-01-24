@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/CeoFred/fast-otp" 
+	"github.com/CeoFred/fast-otp"
 )
 
 func main() {
@@ -32,11 +32,9 @@ func main() {
 
 	// Define OTP generation payload
 	payload := fastotp.GenerateOTPPayload{
-		Delivery: struct {
-			Email string `json:"email"`
-		}{
-			Email: "example@example.com",
-		},
+    Delivery: OtpDelivery{
+      "email": "example@example.com",
+    },
 		Identifier:  "user123",
 		TokenLength: 6,
 		Type:        "numeric",
@@ -50,6 +48,19 @@ func main() {
 	}
 
 	fmt.Printf("Generated OTP: %s\n", otp)
+
+  // Validate OTP
+  otp, err = client.ValidateOTP(
+     ValidateOTPPayload{
+        Identifier: "user123",
+        Token: "123456"
+    }
+  )
+	if err != nil {
+		log.Fatal(err)
+	}
+
+  fmt.Printf("Otp validation status: %s\n", otp.Status)
 }
 ```
 
@@ -60,7 +71,6 @@ For detailed information about the FastOTP API and available endpoints, refer to
 ## Configuration
 
 - `APIKey`: Your FastOTP API key.
-
 
 ## Contributing
 
