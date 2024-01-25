@@ -37,7 +37,24 @@ func (c *APIClient) Post(endpoint string, payload interface{}) (*http.Response, 
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.APIKey))
+	req.Header.Set("x-api-key", c.APIKey)
+
+	client := http.DefaultClient
+	return client.Do(req)
+}
+
+// Get sends a GET request to the specified endpoint, appending id as a path parameter
+func (c *APIClient) Get(id string) (*http.Response, error) {
+	url := fmt.Sprintf("%s/%s", c.BaseURL, id)
+	fmt.Println(url)
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-api-key", c.APIKey)
 
 	client := http.DefaultClient
 	return client.Do(req)
