@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,13 +12,15 @@ import (
 type APIClient struct {
 	BaseURL string
 	APIKey  string
+	Ctx     context.Context
 }
 
 // NewAPIClient creates a new instance of APIClient.
-func NewAPIClient(baseURL, apiKey string) *APIClient {
+func NewAPIClient(baseURL, apiKey string, ctx context.Context) *APIClient {
 	return &APIClient{
 		BaseURL: baseURL,
 		APIKey:  apiKey,
+		Ctx:     ctx,
 	}
 }
 
@@ -31,7 +34,7 @@ func (c *APIClient) Post(endpoint string, payload interface{}) (*http.Response, 
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequestWithContext(c.Ctx, http.MethodPost, url, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +51,7 @@ func (c *APIClient) Get(id string) (*http.Response, error) {
 	url := fmt.Sprintf("%s/%s", c.BaseURL, id)
 	fmt.Println(url)
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(c.Ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
