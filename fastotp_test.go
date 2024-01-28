@@ -1,6 +1,7 @@
 package fastotp
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -55,7 +56,8 @@ func TestGenerateOTP(t *testing.T) {
 		Validity:    120,
 	}
 
-	otp, err := fastOtp.GenerateOTP(payload)
+	ctx := context.Background()
+	otp, err := fastOtp.GenerateOTP(ctx, payload)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -109,7 +111,8 @@ func TestValidateOTP(t *testing.T) {
 		Token:      "123456",
 	}
 
-	otp, err := fastOtp.ValidateOTP(payload)
+	ctx := context.Background()
+	otp, err := fastOtp.ValidateOTP(ctx, payload)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}

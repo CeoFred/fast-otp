@@ -1,6 +1,7 @@
 package fastotp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -62,8 +63,8 @@ func NewFastOTP(apiKey string) *FastOtp {
 	return &FastOtp{APIKey: &apiKey, BaseURL: BaseURL}
 }
 
-func (f *FastOtp) GenerateOTP(payload GenerateOTPPayload) (*OTP, error) {
-	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey)
+func (f *FastOtp) GenerateOTP(ctx context.Context, payload GenerateOTPPayload) (*OTP, error) {
+	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey, ctx)
 	resp, err := cl.Post("/generate", payload)
 	if err != nil {
 		return nil, err
@@ -91,8 +92,8 @@ func (f *FastOtp) GenerateOTP(payload GenerateOTPPayload) (*OTP, error) {
 	return &otpResponse.OTP, nil
 }
 
-func (f *FastOtp) ValidateOTP(payload ValidateOTPPayload) (*OTP, error) {
-	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey)
+func (f *FastOtp) ValidateOTP(ctx context.Context, payload ValidateOTPPayload) (*OTP, error) {
+	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey, ctx)
 	resp, err := cl.Post("/validate", payload)
 	if err != nil {
 		return nil, err
@@ -120,8 +121,8 @@ func (f *FastOtp) ValidateOTP(payload ValidateOTPPayload) (*OTP, error) {
 	return &otpResponse.OTP, nil
 }
 
-func (f *FastOtp) GetOtp(id string) (*OTP, error) {
-	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey)
+func (f *FastOtp) GetOtp(ctx context.Context, id string) (*OTP, error) {
+	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey, ctx)
 	resp, err := cl.Get(id)
 	if err != nil {
 		fmt.Println("got here")
