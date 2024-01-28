@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	// FastOTPClient is the default HTTP client for the FastOtp package.
 	FastOTPClient = &http.Client{
 		Timeout: time.Duration(5) * time.Second,
 		Transport: &http.Transport{
