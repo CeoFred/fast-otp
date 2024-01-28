@@ -2,6 +2,7 @@ package fastotp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -107,7 +108,7 @@ func TestGenerateOTP(t *testing.T) {
 		Validity:    120,
 	}
 
-	otp, err := fastOtp.GenerateOTP(payload)
+	otp, err := fastOtp.GenerateOTP(context.TODO(), payload)
 	require.NoError(t, err)
 	require.NotNil(t, otp)
 
@@ -136,7 +137,7 @@ func TestGenerateOTP_500Response(t *testing.T) {
 		Validity:    120,
 	}
 
-	otp, err := fastOtp.GenerateOTP(payload)
+	otp, err := fastOtp.GenerateOTP(context.TODO(), payload)
 	require.Error(t, err)
 	assert.Nil(t, otp)
 }
@@ -159,7 +160,7 @@ func TestGenerateOTP_400Response(t *testing.T) {
 		Validity:    120,
 	}
 
-	otp, err := fastOtp.GenerateOTP(payload)
+	otp, err := fastOtp.GenerateOTP(context.TODO(), payload)
 	require.Error(t, err)
 	assert.Nil(t, otp)
 	assert.Contains(t, err.Error(), "something isn't right")
@@ -168,7 +169,7 @@ func TestGenerateOTP_400Response(t *testing.T) {
 func TestGenerateOTP_401ErrorResponse(t *testing.T) {
 	fastOtp := &FastOTP{
 		client: mockedHTTPClient{
-			GetFunc: func(id string) (*http.Response, error) {
+			GetFunc: func(ctx context.Context, id string) (*http.Response, error) {
 				var otpResponse *OTPResponse
 				err := json.NewDecoder(bytes.NewBuffer([]byte(mockedValidationResponse))).Decode(&otpResponse)
 				if err != nil {
@@ -179,7 +180,7 @@ func TestGenerateOTP_401ErrorResponse(t *testing.T) {
 						Errors:  map[string][]string{"error": {"something isn't right"}},
 						Message: "something isn't right"})
 			},
-			PostFunc: func(endpoint string, payload interface{}) (*http.Response, error) {
+			PostFunc: func(ctx context.Context, endpoint string, payload interface{}) (*http.Response, error) {
 				return nil, errors.New("something isn't right")
 			},
 		},
@@ -196,7 +197,7 @@ func TestGenerateOTP_401ErrorResponse(t *testing.T) {
 		Validity:    120,
 	}
 
-	otp, err := fastOtp.GenerateOTP(payload)
+	otp, err := fastOtp.GenerateOTP(context.TODO(), payload)
 	require.Error(t, err)
 	require.Nil(t, otp)
 }
@@ -204,7 +205,7 @@ func TestGenerateOTP_401ErrorResponse(t *testing.T) {
 func TestGenerateOTP_401MoreErrorResponse(t *testing.T) {
 	fastOtp := &FastOTP{
 		client: mockedHTTPClient{
-			PostFunc: func(endpoint string, payload interface{}) (*http.Response, error) {
+			PostFunc: func(ctx context.Context, endpoint string, payload interface{}) (*http.Response, error) {
 				return httpmock.NewJsonResponse(401,
 					&ErrorResponse{
 						Errors:  map[string][]string{"error": {"something isn't right"}},
@@ -224,7 +225,7 @@ func TestGenerateOTP_401MoreErrorResponse(t *testing.T) {
 		Validity:    120,
 	}
 
-	otp, err := fastOtp.GenerateOTP(payload)
+	otp, err := fastOtp.GenerateOTP(context.TODO(), payload)
 	require.Error(t, err)
 	require.Nil(t, otp)
 }
@@ -247,7 +248,7 @@ func TestGenerateOTP_401Response(t *testing.T) {
 		Validity:    120,
 	}
 
-	otp, err := fastOtp.GenerateOTP(payload)
+	otp, err := fastOtp.GenerateOTP(context.TODO(), payload)
 	require.Error(t, err)
 	assert.Nil(t, otp)
 	assert.Contains(t, err.Error(), "something isn't right")
@@ -265,7 +266,8 @@ func TestValidateOTP(t *testing.T) {
 		Token:      "123456",
 	}
 
-	otp, err := fastOtp.ValidateOTP(payload)
+	ctx := context.Background()
+	otp, err := fastOtp.ValidateOTP(ctx, payload)
 	require.NoError(t, err)
 	require.NotNil(t, otp)
 	assert.Equal(t, "test_identifier", otp.Identifier)
@@ -282,11 +284,10 @@ func TestValidateOTP_500Response(t *testing.T) {
 		Identifier: "test_identifier",
 		Token:      "123456",
 	}
-
-	otp, err := fastOtp.ValidateOTP(payload)
+	ctx := context.Background()
+	otp, err := fastOtp.ValidateOTP(ctx, payload)
 	require.Error(t, err)
 	assert.Nil(t, otp)
-
 }
 
 func TestValidateOTP_400Response(t *testing.T) {
@@ -299,7 +300,7 @@ func TestValidateOTP_400Response(t *testing.T) {
 		Token:      "123456",
 	}
 
-	otp, err := fastOtp.ValidateOTP(payload)
+	otp, err := fastOtp.ValidateOTP(context.TODO(), payload)
 	require.Error(t, err)
 	assert.Nil(t, otp)
 }
@@ -315,7 +316,7 @@ func TestValidateOTP_401Response(t *testing.T) {
 		Token:      "123456",
 	}
 
-	otp, err := fastOtp.ValidateOTP(payload)
+	otp, err := fastOtp.ValidateOTP(context.TODO(), payload)
 	require.Error(t, err)
 	assert.Nil(t, otp)
 }
@@ -323,7 +324,7 @@ func TestValidateOTP_401Response(t *testing.T) {
 func TestValidateOTP_401MoreErrorResponse(t *testing.T) {
 	fastOtp := &FastOTP{
 		client: mockedHTTPClient{
-			PostFunc: func(endpoint string, payload interface{}) (*http.Response, error) {
+			PostFunc: func(ctx context.Context, endpoint string, payload interface{}) (*http.Response, error) {
 				return httpmock.NewJsonResponse(401,
 					&ErrorResponse{
 						Errors:  map[string][]string{"error": {"something isn't right"}},
@@ -337,7 +338,7 @@ func TestValidateOTP_401MoreErrorResponse(t *testing.T) {
 		Token:      "123456",
 	}
 
-	otp, err := fastOtp.ValidateOTP(payload)
+	otp, err := fastOtp.ValidateOTP(context.TODO(), payload)
 	require.Error(t, err)
 	assert.Nil(t, otp)
 }
@@ -345,7 +346,7 @@ func TestValidateOTP_401MoreErrorResponse(t *testing.T) {
 func TestValidateOTP_POSTError(t *testing.T) {
 	fastOtp := &FastOTP{
 		client: mockedHTTPClient{
-			PostFunc: func(endpoint string, payload interface{}) (*http.Response, error) {
+			PostFunc: func(ctx context.Context, endpoint string, payload interface{}) (*http.Response, error) {
 				return nil, errors.New("some error")
 			},
 		},
@@ -356,16 +357,16 @@ func TestValidateOTP_POSTError(t *testing.T) {
 		Token:      "123456",
 	}
 
-	otp, err := fastOtp.ValidateOTP(payload)
+	otp, err := fastOtp.ValidateOTP(context.TODO(), payload)
 	require.EqualError(t, err, "some error")
 	assert.Nil(t, otp)
 }
 
 func TestFastOtp_GetOtp(t *testing.T) {
 	fastOtp := &FastOTP{
-		APIKey: "",
+		apiKey: mockAPIKey,
 		client: mockedHTTPClient{
-			GetFunc: func(id string) (*http.Response, error) {
+			GetFunc: func(ctx context.Context, id string) (*http.Response, error) {
 				var otpResponse *OTPResponse
 				err := json.NewDecoder(bytes.NewBuffer([]byte(mockedValidationResponse))).Decode(&otpResponse)
 				if err != nil {
@@ -376,7 +377,7 @@ func TestFastOtp_GetOtp(t *testing.T) {
 		},
 	}
 
-	otp, err := fastOtp.GetOtp("test")
+	otp, err := fastOtp.GetOtp(context.TODO(), "test")
 	require.NoError(t, err)
 	require.NotNil(t, otp)
 
@@ -387,7 +388,7 @@ func TestFastOtp_GetOtp(t *testing.T) {
 func TestFastOtp_GetOtpWithError(t *testing.T) {
 	fastOtp := &FastOTP{
 		client: mockedHTTPClient{
-			GetFunc: func(id string) (*http.Response, error) {
+			GetFunc: func(ctx context.Context, id string) (*http.Response, error) {
 				var otpResponse *OTPResponse
 				err := json.NewDecoder(bytes.NewBuffer([]byte(mockedValidationResponse))).Decode(&otpResponse)
 				if err != nil {
@@ -398,7 +399,7 @@ func TestFastOtp_GetOtpWithError(t *testing.T) {
 		},
 	}
 
-	otp, err := fastOtp.GetOtp("test")
+	otp, err := fastOtp.GetOtp(context.TODO(), "test")
 	require.Error(t, err)
 	require.Nil(t, otp)
 }
@@ -406,7 +407,7 @@ func TestFastOtp_GetOtpWithError(t *testing.T) {
 func TestFastOtp_GetOtpWithMoreError(t *testing.T) {
 	fastOtp := &FastOTP{
 		client: mockedHTTPClient{
-			GetFunc: func(id string) (*http.Response, error) {
+			GetFunc: func(ctx context.Context, id string) (*http.Response, error) {
 				var otpResponse *OTPResponse
 				err := json.NewDecoder(bytes.NewBuffer([]byte(mockedValidationResponse))).Decode(&otpResponse)
 				if err != nil {
@@ -420,7 +421,7 @@ func TestFastOtp_GetOtpWithMoreError(t *testing.T) {
 		},
 	}
 
-	otp, err := fastOtp.GetOtp("test")
+	otp, err := fastOtp.GetOtp(context.TODO(), "test")
 	require.Error(t, err)
 	require.Nil(t, otp)
 }

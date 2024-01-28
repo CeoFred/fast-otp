@@ -30,6 +30,9 @@ func main() {
 	// Create an instance of FastOtp
 	client := fastotp.NewFastOTP(apiKey)
 
+	// Create context for library functions
+	ctx := context.Background()
+
 	// Define OTP generation payload
 	payload := fastotp.GenerateOTPPayload{
     Delivery: OtpDelivery{
@@ -42,7 +45,7 @@ func main() {
 	}
 
 	// Generate OTP
-	otp, err := client.GenerateOTP(payload)
+	otp, err := client.GenerateOTP(ctx, payload)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,9 +54,10 @@ func main() {
 
   // Validate OTP
   otp, err = client.ValidateOTP(
+	 ctx,
      ValidateOTPPayload{
         Identifier: "user123",
-        Token: "123456"
+        Token: "123456",
     }
   )
 	if err != nil {

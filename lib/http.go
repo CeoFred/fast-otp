@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -37,7 +38,7 @@ func NewAPIClient(baseURL, apiKey string) *APIClient {
 }
 
 // Post sends a POST request to the specified endpoint with the given payload.
-func (c *APIClient) Post(endpoint string, payload interface{}) (*http.Response, error) {
+func (c *APIClient) Post(ctx context.Context, endpoint string, payload interface{}) (*http.Response, error) {
 	url := c.baseURL + endpoint
 
 	// Convert payload to JSON
@@ -46,7 +47,7 @@ func (c *APIClient) Post(endpoint string, payload interface{}) (*http.Response, 
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return nil, err
 	}
@@ -58,10 +59,9 @@ func (c *APIClient) Post(endpoint string, payload interface{}) (*http.Response, 
 }
 
 // Get sends a GET request to the specified endpoint, appending id as a path parameter
-func (c *APIClient) Get(id string) (*http.Response, error) {
+func (c *APIClient) Get(ctx context.Context, id string) (*http.Response, error) {
 	url := fmt.Sprintf("%s/%s", c.baseURL, id)
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

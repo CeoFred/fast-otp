@@ -1,6 +1,7 @@
 package fastotp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,7 +16,7 @@ const (
 
 // FastOTP is the main struct for the FastOtp package.
 type FastOTP struct {
-	APIKey  string
+	apiKey  string
 	baseURL string
 	client  HttpClient
 }
@@ -70,15 +71,14 @@ type ValidateOTPPayload struct {
 // NewFastOTP creates a new FastOtp instance.
 func NewFastOTP(apiKey string) *FastOTP {
 	return &FastOTP{
-		APIKey:  apiKey,
+		apiKey:  apiKey,
 		baseURL: baseURL,
 		client:  httpclient.NewAPIClient(baseURL, apiKey),
 	}
 }
 
-// GenerateOTP generates an OTP.
-func (f *FastOTP) GenerateOTP(payload GenerateOTPPayload) (*OTP, error) {
-	resp, err := f.client.Post("/generate", payload)
+func (f *FastOTP) GenerateOTP(ctx context.Context, payload GenerateOTPPayload) (*OTP, error) {
+	resp, err := f.client.Post(ctx, "/generate", payload)
 	if err != nil {
 		return nil, err
 	}
@@ -105,9 +105,8 @@ func (f *FastOTP) GenerateOTP(payload GenerateOTPPayload) (*OTP, error) {
 	return &otpResponse.OTP, nil
 }
 
-// ValidateOTP validates an OTP.
-func (f *FastOTP) ValidateOTP(payload ValidateOTPPayload) (*OTP, error) {
-	resp, err := f.client.Post("/validate", payload)
+func (f *FastOTP) ValidateOTP(ctx context.Context, payload ValidateOTPPayload) (*OTP, error) {
+	resp, err := f.client.Post(ctx, "/validate", payload)
 	if err != nil {
 		return nil, err
 	}
@@ -135,8 +134,8 @@ func (f *FastOTP) ValidateOTP(payload ValidateOTPPayload) (*OTP, error) {
 }
 
 // GetOtp gets a new otp
-func (f *FastOTP) GetOtp(id string) (*OTP, error) {
-	resp, err := f.client.Get(id)
+func (f *FastOTP) GetOtp(ctx context.Context, id string) (*OTP, error) {
+	resp, err := f.client.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}

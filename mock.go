@@ -1,18 +1,19 @@
 package fastotp
 
 import (
+	"context"
 	"net/http"
 )
 
 type mockedHTTPClient struct {
-	GetFunc  func(id string) (*http.Response, error)
-	PostFunc func(endpoint string, payload interface{}) (*http.Response, error)
+	GetFunc  func(ctx context.Context, id string) (*http.Response, error)
+	PostFunc func(ctx context.Context, endpoint string, payload interface{}) (*http.Response, error)
 }
 
-func (m mockedHTTPClient) Get(id string) (*http.Response, error) {
-	return m.GetFunc(id)
+func (m mockedHTTPClient) Get(ctx context.Context, id string) (*http.Response, error) {
+	return m.GetFunc(ctx, id)
 }
 
-func (m mockedHTTPClient) Post(endpoint string, payload interface{}) (*http.Response, error) {
-	return m.PostFunc(endpoint, payload)
+func (m mockedHTTPClient) Post(ctx context.Context, endpoint string, payload interface{}) (*http.Response, error) {
+	return m.PostFunc(ctx, endpoint, payload)
 }
