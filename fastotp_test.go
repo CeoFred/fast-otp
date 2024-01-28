@@ -363,8 +363,7 @@ func TestValidateOTP_POSTError(t *testing.T) {
 
 func TestFastOtp_GetOtp(t *testing.T) {
 	fastOtp := &FastOTP{
-		APIKey:  "",
-		BaseURL: "",
+		APIKey: "",
 		client: mockedHTTPClient{
 			GetFunc: func(id string) (*http.Response, error) {
 				var otpResponse *OTPResponse
@@ -462,7 +461,7 @@ func mockErrorHttpRequest(code int, method, path, response string) func() {
 		var (
 			errorResponse ErrorResponse
 		)
-		err := json.NewDecoder(bytes.NewBuffer([]byte(mockedError))).Decode(&errorResponse)
+		err := json.NewDecoder(bytes.NewBuffer([]byte(response))).Decode(&errorResponse)
 		if err != nil {
 			return httpmock.NewStringResponse(http.StatusInternalServerError, mockedError), nil
 		}

@@ -16,7 +16,7 @@ const (
 // FastOTP is the main struct for the FastOtp package.
 type FastOTP struct {
 	APIKey  string
-	BaseURL string
+	baseURL string
 	client  HttpClient
 }
 
@@ -71,7 +71,7 @@ type ValidateOTPPayload struct {
 func NewFastOTP(apiKey string) *FastOTP {
 	return &FastOTP{
 		APIKey:  apiKey,
-		BaseURL: baseURL,
+		baseURL: baseURL,
 		client:  httpclient.NewAPIClient(baseURL, apiKey),
 	}
 }
