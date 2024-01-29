@@ -11,8 +11,42 @@ on:
 
 jobs:
 
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.1'
+          cache: false
+
+      - name: Lint and Vet
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+  
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.1'
+  
+      - name: Test
+        run: go test -v ./... --cover
+
   build:
     runs-on: ubuntu-latest
+    needs: 
+      - lint
+      - test
     steps:
     - uses: actions/checkout@v3
 
@@ -24,5 +58,3 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
-      run: go test -v ./...

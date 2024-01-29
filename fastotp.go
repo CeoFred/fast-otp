@@ -11,19 +11,23 @@ import (
 )
 
 const (
-	BaseURL = "https://api.fastotp.co"
+	baseURL = "https://api.fastotp.co"
 )
 
-type FastOtp struct {
-	APIKey  *string
-	BaseURL string
+// FastOTP is the main struct for the FastOtp package.
+type FastOTP struct {
+	apiKey  string
+	baseURL string
+	client  HttpClient
 }
 
+// ErrorResponse is the error struct for the FastOtp package.
 type ErrorResponse struct {
 	Errors  map[string][]string `json:"errors"`
 	Message string              `json:"message"`
 }
 
+// OTP is the struct for the OTP object.
 type OTP struct {
 	CreatedAt       time.Time       `json:"created_at"`
 	ExpiresAt       time.Time       `json:"expires_at"`
@@ -31,41 +35,50 @@ type OTP struct {
 	DeliveryDetails DeliveryDetails `json:"delivery_details"`
 	ID              string          `json:"id"`
 	Identifier      string          `json:"identifier"`
-	Status          string          `json:"status"`
-	Type            string          `json:"type"`
+	Status          OTPStatus       `json:"status"`
+	Type            OTPType         `json:"type"`
 	DeliveryMethods []string        `json:"delivery_methods"`
 }
 
+// OTPResponse is the struct for the OTP response object.
 type OTPResponse struct {
 	OTP OTP `json:"otp"`
 }
 
+// DeliveryDetails is the struct for the DeliveryDetails object.
 type DeliveryDetails struct {
 	Email string `json:"email"`
 }
 
-type OtpDelivery map[string]string
+// OTPDelivery is the struct for the OtpDelivery object.
+type OTPDelivery map[string]string
 
+// GenerateOTPPayload is the struct for the GenerateOTPPayload object.
 type GenerateOTPPayload struct {
-	Delivery    OtpDelivery `json:"delivery"`
+	Delivery    OTPDelivery `json:"delivery"`
 	Identifier  string      `json:"identifier"`
-	Type        string      `json:"type"`
+	Type        OTPType     `json:"type"`
 	TokenLength int         `json:"token_length"`
 	Validity    int         `json:"validity"`
 }
 
+// ValidateOTPPayload is the struct for the ValidateOTPPayload object.
 type ValidateOTPPayload struct {
 	Identifier string `json:"identifier"`
 	Token      string `json:"token"`
 }
 
-func NewFastOTP(apiKey string) *FastOtp {
-	return &FastOtp{APIKey: &apiKey, BaseURL: BaseURL}
+// NewFastOTP creates a new FastOtp instance.
+func NewFastOTP(apiKey string) *FastOTP {
+	return &FastOTP{
+		apiKey:  apiKey,
+		baseURL: baseURL,
+		client:  httpclient.NewAPIClient(baseURL, apiKey),
+	}
 }
 
-func (f *FastOtp) GenerateOTP(ctx context.Context, payload GenerateOTPPayload) (*OTP, error) {
-	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey, ctx)
-	resp, err := cl.Post("/generate", payload)
+func (f *FastOTP) GenerateOTP(ctx context.Context, payload GenerateOTPPayload) (*OTP, error) {
+	resp, err := f.client.Post(ctx, "/generate", payload)
 	if err != nil {
 		return nil, err
 	}
@@ -92,9 +105,8 @@ func (f *FastOtp) GenerateOTP(ctx context.Context, payload GenerateOTPPayload) (
 	return &otpResponse.OTP, nil
 }
 
-func (f *FastOtp) ValidateOTP(ctx context.Context, payload ValidateOTPPayload) (*OTP, error) {
-	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey, ctx)
-	resp, err := cl.Post("/validate", payload)
+func (f *FastOTP) ValidateOTP(ctx context.Context, payload ValidateOTPPayload) (*OTP, error) {
+	resp, err := f.client.Post(ctx, "/validate", payload)
 	if err != nil {
 		return nil, err
 	}
@@ -121,11 +133,10 @@ func (f *FastOtp) ValidateOTP(ctx context.Context, payload ValidateOTPPayload) (
 	return &otpResponse.OTP, nil
 }
 
-func (f *FastOtp) GetOtp(ctx context.Context, id string) (*OTP, error) {
-	cl := httpclient.NewAPIClient(f.BaseURL, *f.APIKey, ctx)
-	resp, err := cl.Get(id)
+// GetOtp gets a new otp
+func (f *FastOTP) GetOtp(ctx context.Context, id string) (*OTP, error) {
+	resp, err := f.client.Get(ctx, id)
 	if err != nil {
-		fmt.Println("got here")
 		return nil, err
 	}
 	defer resp.Body.Close()
