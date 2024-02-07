@@ -1,16 +1,34 @@
-package weavychat
+package fastotp
 
 type (
-	AppType string
+
+	// OTPType otp types
+	OTPType string
+
+	// OTPStatus status of otp
+	OTPStatus string
 )
 
 const (
-	AppTypeChat  AppType = "chat"
-	AppTypeFiles AppType = "files"
-	AppTypePosts AppType = "posts"
+	OTPTypeUnknown OTPType = "unknown"
+	// OTPTypeNumeric numbers only OTP
+	OTPTypeNumeric OTPType = "numeric"
+	// OTPTypeAlpha alphabet only OTP
+	OTPTypeAlpha OTPType = "alpha"
+	// OTPTypeAlphaNumeric combination of numbers and alphabet OTP
+	OTPTypeAlphaNumeric OTPType = "alpha_numeric"
+
+	// OTPStatusPending pending otp status
+	OTPStatusPending OTPStatus = "pending"
+	// OTPStatusValidated validated otp status
+	OTPStatusValidated OTPStatus = "validated"
 )
 
 // String returns the string value of OTPType
-func (o AppType) String() string {
+func (o OTPType) String() string {
+	return string(o)
+}
+
+func (o OTPStatus) String() string {
 	return string(o)
 }

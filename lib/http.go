@@ -47,34 +47,13 @@ func (c *APIClient) Post(ctx context.Context, endpoint string, payload interface
 		return nil, err
 	}
 
-	fmt.Println(url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
-
-	return c.client.Do(req)
-}
-
-func (c *APIClient) Delete(ctx context.Context, endpoint string, payload interface{}) (*http.Response, error) {
-	url := c.baseURL + endpoint
-
-	// Convert payload to JSON
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
+	req.Header.Set("x-api-key", c.apiKey)
 
 	return c.client.Do(req)
 }
@@ -88,7 +67,7 @@ func (c *APIClient) Get(ctx context.Context, id string) (*http.Response, error) 
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
+	req.Header.Set("x-api-key", c.apiKey)
 
 	return c.client.Do(req)
 }

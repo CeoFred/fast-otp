@@ -1,104 +1,89 @@
-# Weavy Chat GO Lang SDK
+# Go FastOTP
 
-This library provides a Go client for interacting with the Weavy Chat API. It allows you to create applications, manage users, issue access tokens, and perform various operations within the Weavy Chat ecosystem.
+FastOTP is a Go library for interacting with the FastOTP API to generate one-time passwords (OTPs) easily.
 
 ## Installation
 
-To install the library, use `go get`:
-
 ```bash
-go get github.com/CeoFred/weavychat
+go get -u github.com/CeoFred/fast-otp@v1.0.2
 ```
 
 ## Usage
 
-```go
-import "github.com/CeoFred/weavychat"
-```
-
-## Documentation 
-This library currently supports the following Weavy Chat API methods:
-
-`NewWeavyServer`: Creates a new WeavyServer instance.
-`NewApp`: Creates a new app.
-`GetApp`: Retrieves an existing app.
-`NewUser`: Creates a new user.
-`AddUserToApp`: Adds users to an app.
-`RemoveUserFromApp`: Removes users from an app.
-`AppInit`: Initializes an app.
-`GetAccessToken`: Issues an access token for a user.
-
-## Authentication
-
-You need to provide the server URL and API key to authenticate with the Weavy Chat API.
+### Basic Example
 
 ```go
-weavyServer := weavychat.NewWeavyServer("your-weavy-server-url", "your-api-key")
-```
 
-## Creating Applications
+package main
 
-You can create applications using the `NewApp` method:
+import (
+	"fmt"
+	"log"
 
-```go
-appRequest := &weavychat.AppRequest{
-    ID:          1,
-    Type:        weavychat.AppType("your-app-type"),
-    UID:         "your-uid",
-    DisplayName: "Your App",
-    Metadata:    weavychat.Metadata{},
-    Tags:        []string{"tag1", "tag2"},
-}
+	"github.com/CeoFred/fast-otp"
+)
 
-app, err := weavyServer.NewApp(context.Background(), appRequest)
-if err != nil {
-    // Handle error
-}
-```
+func main() {
+	// Replace "your_api_key" with your actual FastOTP API key
+	apiKey := "your_api_key"
 
-## Managing Users
+	// Create an instance of FastOtp
+	client := fastotp.NewFastOTP(apiKey)
 
-You can create new users using the `NewUser` method:
+	// Create context for library functions
+	ctx := context.Background()
 
-```go
-user := &weavychat.User{
-    UID:         "user-uid",
-    Email:       "user@example.com",
-    GivenName:   "John",
-    MiddleName:  "Doe",
-    Name:        "John Doe",
-    FamilyName:  "Doe",
-    Nickname:    "JD",
-    PhoneNumber: "+1234567890",
-    Comment:     "A new user",
-    Picture:     "user-avatar-url",
-    Directory:   "directory-id",
-    Metadata:    weavychat.Metadata{},
-    Tags:        []string{"tag1", "tag2"},
-    IsSuspended: false,
-}
+	// Define OTP generation payload
+	payload := fastotp.GenerateOTPPayload{
+    Delivery: OtpDelivery{
+      "email": "example@example.com",
+    },
+		Identifier:  "user123",
+		TokenLength: 6,
+		Type:        "numeric",
+		Validity:    120,
+	}
 
-newUser, err := weavyServer.NewUser(context.Background(), user)
-if err != nil {
-    // Handle error
+	// Generate OTP
+	otp, err := client.GenerateOTP(ctx, payload)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Generated OTP: %s\n", otp)
+
+  // Validate OTP
+  otp, err = client.ValidateOTP(
+	 ctx,
+     ValidateOTPPayload{
+        Identifier: "user123",
+        Token: "123456",
+    }
+  )
+	if err != nil {
+		log.Fatal(err)
+	}
+
+  fmt.Printf("Otp validation status: %s\n", otp.Status)
 }
 ```
 
-## Access Tokens
+## API Documentation
 
-You can issue access tokens for users:
+For detailed information about the FastOTP API and available endpoints, refer to the [official API documentation](https://api.fastotp.co/docs).
 
-```go
-accessToken, err := weavyServer.GetAccessToken(context.Background(), "user-uid", 3600)
-if err != nil {
-    // Handle error
-}
-```
+## Configuration
+
+- `APIKey`: Your FastOTP API key.
 
 ## Contributing
 
-Contributions are welcome! If you find any issues or have suggestions for improvement, please create an issue or a pull request on GitHub.
+If you'd like to contribute to this project, please follow the guidelines in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-This library is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Thanks to the FastOTP team for providing the awesome OTP generation service.
