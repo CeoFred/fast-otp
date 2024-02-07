@@ -1,4 +1,4 @@
-package fastotp
+package weavychat
 
 import (
 	"context"

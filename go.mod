@@ -1,4 +1,4 @@
-module github.com/CeoFred/fast-otp
+module github.com/CeoFred/weavychat
 
 go 1.21.2
 
